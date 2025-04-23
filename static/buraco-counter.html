@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buraco Counter</title>
+    <title>Marcador de Buraco</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .toggle-btn input[type="radio"] {
@@ -17,6 +17,68 @@
 
         .toggle-btn .btn-check:checked + .btn {
             border-width: 2px;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .card, 
+        .dark-mode .modal-content {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        .dark-mode .table {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .table-dark {
+            background-color: #2c2c2c !important;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .table-secondary {
+            background-color: #252525 !important;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .form-control,
+        .dark-mode .form-select {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        .dark-mode .btn-close {
+            filter: invert(1);
+        }
+
+        .dark-mode .modal-header,
+        .dark-mode .modal-footer {
+            border-color: #444;
+        }
+
+        /* Improved dark mode table colors */
+        .dark-mode .table-bordered {
+            border-color: #444 !important;
+        }
+
+        .dark-mode .table-bordered th,
+        .dark-mode .table-bordered td {
+            border-color: #444 !important;
+        }
+
+        /* Language selector flags */
+        .language-flag {
+            width: 20px;
+            height: 15px;
+            margin-right: 8px;
+            vertical-align: middle;
         }
 
         /* Responsive adjustments */
@@ -108,53 +170,79 @@
         input, select, textarea {
             font-size: 16px !important;
         }
+
+        /* Toast notification */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
     </style>
 </head>
 <body class="bg-light">
 <div class="container py-3 py-md-5">
 
-    <h1 class="text-center mb-3 mb-md-4">🃏 Buraco Score Counter</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-center mb-0" data-i18n="title">🃏 Marcador de Buraco</h1>
+        <div class="d-flex gap-2">
+            <button id="theme-toggle" class="btn btn-sm btn-outline-secondary">🌙</button>
+            <select id="language-select" class="form-select form-select-sm" style="width: auto;">
+                <option value="es" data-flag="🇪🇸">ES</option>
+                <option value="en" data-flag="🇬🇧">EN</option>
+                <option value="pt" data-flag="🇵🇹">PT</option>
+            </select>
+        </div>
+    </div>
 
     <div id="setup-form" class="card mx-auto" style="max-width: 400px; display: none;">
         <div class="card-body">
             <form id="game-setup">
                 <div class="mb-3">
-                    <label class="form-label">Number of Teams</label>
+                    <label class="form-label" data-i18n="numTeams">Número de Equipos</label>
                     <input type="number" id="teams" name="teams" class="form-control" min="2" value="2" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Goal Points</label>
+                    <label class="form-label" data-i18n="goalPoints">Puntos Objetivo</label>
                     <input type="number" id="goal" name="goal" class="form-control" value="3000" required>
                 </div>
-                <button class="btn btn-primary w-100" type="submit">Start Game</button>
+                <button class="btn btn-primary w-100" type="submit" data-i18n="startGame">Comenzar Juego</button>
             </form>
         </div>
     </div>
 
     <div id="game-container" style="display: none;">
-        <h4 class="text-center mb-2 mb-md-3" id="goal-display">Goal: 3000 points</h4>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="text-center mb-0" id="goal-display" data-i18n="goal">Objetivo: 3000 puntos</h4>
+            <div class="d-flex gap-2">
+                <button id="export-btn" class="btn btn-sm btn-outline-secondary" data-i18n="export">Exportar</button>
+                <button id="import-btn" class="btn btn-sm btn-outline-secondary" data-i18n="import">Importar</button>
+                <input type="file" id="import-input" accept=".json" style="display:none">
+            </div>
+        </div>
 
         <div class="table-responsive mb-3">
             <table class="table table-bordered text-center align-middle mb-0">
                 <thead class="table-dark">
                     <tr id="table-header">
-                        <th>Round</th>
+                        <th data-i18n="round">Ronda</th>
                     </tr>
                 </thead>
                 <tbody id="history-body">
                 </tbody>
                 <tfoot class="table-secondary fw-bold">
                     <tr id="total-row">
-                        <td>Total</td>
+                        <td data-i18n="total">Total</td>
                     </tr>
                 </tfoot>
             </table>
         </div>
 
         <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3 mt-3 mt-md-4">
-            <button class="btn btn-success flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#addPointsModal">Add Points</button>
-            <button class="btn btn-warning flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#renameTeamsModal">Rename Teams</button>
-            <button class="btn btn-danger flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#resetConfirmModal">Reset</button>
+            <button class="btn btn-success flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#addPointsModal" data-i18n="addPoints">Añadir Puntos</button>
+            <button class="btn btn-warning flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#renameTeamsModal" data-i18n="renameTeams">Renombrar Equipos</button>
+            <button class="btn btn-danger flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#resetConfirmModal" data-i18n="reset">Reiniciar</button>
+            <button id="undo-btn" class="btn btn-info flex-grow-1 flex-md-grow-0" data-i18n="undo">Deshacer</button>
         </div>
 
         <!-- Add/Subtract Points Modal -->
@@ -162,13 +250,13 @@
             <div class="modal-dialog">
                 <form id="update-scores-form" class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Enter Round Points</h5>
+                        <h5 class="modal-title" data-i18n="enterPoints">Puntos de la Ronda</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" id="points-input-container">
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Submit Round</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="submitRound">Enviar Ronda</button>
                     </div>
                 </form>
             </div>
@@ -179,15 +267,15 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title text-danger">Are you sure?</h5>
+                        <h5 class="modal-title text-danger" data-i18n="confirmReset">¿Estás seguro?</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        This will reset all scores and game settings.
+                    <div class="modal-body" data-i18n="resetWarning">
+                        Esto reiniciará todos los puntajes y configuraciones.
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="confirm-reset" class="btn btn-danger">Yes, Reset</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirm-reset" class="btn btn-danger" data-i18n="yesReset">Sí, Reiniciar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancelar</button>
                     </div>
                 </div>
             </div>
@@ -198,13 +286,13 @@
             <div class="modal-dialog">
                 <form id="rename-teams-form" class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Rename Teams</h5>
+                        <h5 class="modal-title" data-i18n="renameTeams">Renombrar Equipos</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body" id="team-names-container">
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="saveChanges">Guardar Cambios</button>
                     </div>
                 </form>
             </div>
@@ -216,17 +304,20 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="winner-title">🏆 Team Wins!</h5>
+                    <h5 class="modal-title" id="winner-title">🏆 <span data-i18n="teamWins">¡Equipo Gana!</span></h5>
                 </div>
                 <div class="modal-body" id="winner-message">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="confirm-reset-winner" class="btn btn-danger">Reset Game</button>
-                    <button type="button" id="continue-playing" class="btn btn-secondary">Continue Playing</button>
+                    <button type="button" id="confirm-reset-winner" class="btn btn-danger" data-i18n="resetGame">Reiniciar Juego</button>
+                    <button type="button" id="continue-playing" class="btn btn-secondary" data-i18n="continuePlaying">Continuar Jugando</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -239,7 +330,107 @@
         history: [],
         winner: null,
         teamNames: [],
-        continuePlaying: false
+        continuePlaying: false,
+        lastRound: null,
+        darkMode: false,
+        language: 'es'
+    };
+
+    // Translations
+    const translations = {
+        en: {
+            title: "🃏 Buraco Score Counter",
+            numTeams: "Number of Teams",
+            goalPoints: "Goal Points",
+            startGame: "Start Game",
+            goal: "Goal",
+            round: "Round",
+            total: "Total",
+            addPoints: "Add Points",
+            renameTeams: "Rename Teams",
+            reset: "Reset",
+            undo: "Undo",
+            enterPoints: "Enter Round Points",
+            submitRound: "Submit Round",
+            confirmReset: "Are you sure?",
+            resetWarning: "This will reset all scores and game settings.",
+            yesReset: "Yes, Reset",
+            cancel: "Cancel",
+            saveChanges: "Save Changes",
+            team: "Team",
+            teamWins: "Team Wins!",
+            resetGame: "Reset Game",
+            continuePlaying: "Continue Playing",
+            export: "Export",
+            import: "Import",
+            gameExported: "Game exported successfully!",
+            gameImported: "Game imported successfully!",
+            hasReached: "has reached",
+            points: "points",
+            continueQuestion: "Would you like to continue playing or reset the game?"
+        },
+        pt: {
+            title: "🃏 Marcador de Buraco",
+            numTeams: "Número de Times",
+            goalPoints: "Pontos Objetivo",
+            startGame: "Iniciar Jogo",
+            goal: "Objetivo",
+            round: "Rodada",
+            total: "Total",
+            addPoints: "Adicionar Pontos",
+            renameTeams: "Renomear Times",
+            reset: "Reiniciar",
+            undo: "Desfazer",
+            enterPoints: "Pontos da Rodada",
+            submitRound: "Enviar Rodada",
+            confirmReset: "Tem certeza?",
+            resetWarning: "Isso reiniciará todas as pontuações e configurações.",
+            yesReset: "Sim, Reiniciar",
+            cancel: "Cancelar",
+            saveChanges: "Salvar Alterações",
+            team: "Time",
+            teamWins: "Time Venceu!",
+            resetGame: "Reiniciar Jogo",
+            continuePlaying: "Continuar Jogando",
+            export: "Exportar",
+            import: "Importar",
+            gameExported: "Jogo exportado com sucesso!",
+            gameImported: "Jogo importado com sucesso!",
+            hasReached: "alcançou",
+            points: "pontos",
+            continueQuestion: "Você gostaria de continuar jogando ou reiniciar o jogo?"
+        },
+        es: {
+            title: "🃏 Marcador de Buraco",
+            numTeams: "Número de Equipos",
+            goalPoints: "Puntos Objetivo",
+            startGame: "Comenzar Juego",
+            goal: "Objetivo",
+            round: "Ronda",
+            total: "Total",
+            addPoints: "Añadir Puntos",
+            renameTeams: "Renombrar Equipos",
+            reset: "Reiniciar",
+            undo: "Deshacer",
+            enterPoints: "Puntos de la Ronda",
+            submitRound: "Enviar Ronda",
+            confirmReset: "¿Estás seguro?",
+            resetWarning: "Esto reiniciará todos los puntajes y configuraciones.",
+            yesReset: "Sí, Reiniciar",
+            cancel: "Cancelar",
+            saveChanges: "Guardar Cambios",
+            team: "Equipo",
+            teamWins: "¡Equipo Gana!",
+            resetGame: "Reiniciar Juego",
+            continuePlaying: "Continuar Jugando",
+            export: "Exportar",
+            import: "Importar",
+            gameExported: "¡Juego exportado con éxito!",
+            gameImported: "¡Juego importado con éxito!",
+            hasReached: "ha alcanzado",
+            points: "puntos",
+            continueQuestion: "¿Te gustaría continuar jugando o reiniciar el juego?"
+        }
     };
 
     // DOM elements
@@ -251,10 +442,19 @@
     const confirmResetBtn = document.getElementById('confirm-reset');
     const confirmResetWinnerBtn = document.getElementById('confirm-reset-winner');
     const continuePlayingBtn = document.getElementById('continue-playing');
+    const undoBtn = document.getElementById('undo-btn');
+    const themeToggle = document.getElementById('theme-toggle');
+    const languageSelect = document.getElementById('language-select');
+    const exportBtn = document.getElementById('export-btn');
+    const importBtn = document.getElementById('import-btn');
+    const importInput = document.getElementById('import-input');
     const winnerModal = new bootstrap.Modal(document.getElementById('winnerModal'));
 
     // Initialize the game
     function initGame() {
+        // Load preferences
+        loadPreferences();
+        
         // Load from localStorage if available
         const savedGame = localStorage.getItem('buracoGame');
         if (savedGame) {
@@ -275,6 +475,30 @@
         
         // Show setup form if no saved game
         setupForm.style.display = 'block';
+        translatePage(gameState.language);
+        updateLanguageSelectorFlag();
+    }
+
+    // Load user preferences
+    function loadPreferences() {
+        // Dark mode
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            gameState.darkMode = true;
+            themeToggle.textContent = '☀️';
+        }
+        
+        // Language
+        const savedLang = localStorage.getItem('language') || 'es';
+        gameState.language = savedLang;
+        languageSelect.value = savedLang;
+    }
+
+    // Update language selector flag
+    function updateLanguageSelectorFlag() {
+        const selectedOption = languageSelect.options[languageSelect.selectedIndex];
+        const flag = selectedOption.getAttribute('data-flag');
+        languageSelect.previousElementSibling = flag;
     }
 
     // Save game state to localStorage
@@ -289,8 +513,9 @@
         gameState.scores = new Array(teams).fill(0);
         gameState.history = [];
         gameState.winner = null;
-        gameState.teamNames = Array.from({length: teams}, (_, i) => `Team ${i + 1}`);
+        gameState.teamNames = Array.from({length: teams}, (_, i) => `${translations[gameState.language].team} ${i + 1}`);
         gameState.continuePlaying = false;
+        gameState.lastRound = null;
         
         saveGameState();
         showGame();
@@ -314,6 +539,7 @@
         gameState.winner = null;
         gameState.teamNames = [];
         gameState.continuePlaying = false;
+        gameState.lastRound = null;
         
         gameContainer.style.display = 'none';
         setupForm.style.display = 'block';
@@ -322,11 +548,11 @@
     // Update the UI based on game state
     function updateUI() {
         // Update goal display
-        document.getElementById('goal-display').textContent = `Goal: ${gameState.goal} points`;
+        document.getElementById('goal-display').textContent = `${translations[gameState.language].goal}: ${gameState.goal} ${translations[gameState.language].points}`;
         
         // Update table header
         const tableHeader = document.getElementById('table-header');
-        tableHeader.innerHTML = '<th>Round</th>';
+        tableHeader.innerHTML = `<th data-i18n="round">${translations[gameState.language].round}</th>`;
         gameState.teamNames.forEach(name => {
             tableHeader.innerHTML += `<th>${name}</th>`;
         });
@@ -335,7 +561,7 @@
         const historyBody = document.getElementById('history-body');
         historyBody.innerHTML = '';
         gameState.history.forEach((round, roundIndex) => {
-            let row = '<tr><td>' + (roundIndex + 1) + '</td>';
+            let row = `<tr><td>${roundIndex + 1}</td>`;
             round.forEach(value => {
                 row += `<td>${value}</td>`;
             });
@@ -345,7 +571,7 @@
         
         // Update totals row
         const totalRow = document.getElementById('total-row');
-        totalRow.innerHTML = '<td>Total</td>';
+        totalRow.innerHTML = `<td data-i18n="total">${translations[gameState.language].total}</td>`;
         gameState.scores.forEach(score => {
             totalRow.innerHTML += `<td>${score}</td>`;
         });
@@ -368,7 +594,7 @@
         gameState.teamNames.forEach((name, i) => {
             container.innerHTML += `
                 <div class="mb-3">
-                    <label class="form-label">${name} (Team ${i + 1})</label>
+                    <label class="form-label">${name} (${translations[gameState.language].team} ${i + 1})</label>
                     <div class="input-group">
                         <div class="btn-group toggle-btn me-2" role="group">
                             <input type="radio" class="btn-check" name="signs[${i}]" id="neg${i}" value="negative">
@@ -392,7 +618,7 @@
         gameState.teamNames.forEach((name, i) => {
             container.innerHTML += `
                 <div class="mb-3">
-                    <label class="form-label">${gameState.teamNames[i]} (Team ${i + 1})</label>
+                    <label class="form-label">${gameState.teamNames[i]} (${translations[gameState.language].team} ${i + 1})</label>
                     <input type="text" name="team_names[${i}]" class="form-control" value="${name}">
                 </div>
             `;
@@ -401,6 +627,8 @@
 
     // Add a new round of scores
     function addRound(points) {
+        gameState.lastRound = [...gameState.scores]; // Store previous state for undo
+        
         const round = [];
         points.forEach((value, i) => {
             const sign = document.querySelector(`input[name="signs[${i}]"]:checked`).value;
@@ -414,9 +642,22 @@
         updateUI();
     }
 
+    // Undo last round
+    function undoLastRound() {
+        if (gameState.lastRound) {
+            gameState.scores = [...gameState.lastRound];
+            gameState.history.pop();
+            gameState.lastRound = null;
+            gameState.winner = null;
+            saveGameState();
+            updateUI();
+            showToast(translations[gameState.language].undo + " " + translations[gameState.language].success);
+        }
+    }
+
     // Rename teams
     function renameTeams(names) {
-        gameState.teamNames = names.map((name, i) => name.trim() || `Team ${i + 1}`);
+        gameState.teamNames = names.map((name, i) => name.trim() || `${translations[gameState.language].team} ${i + 1}`);
         saveGameState();
         updateUI();
     }
@@ -437,11 +678,86 @@
 
     // Show winner modal
     function showWinnerModal(winnerIndex) {
-        document.getElementById('winner-title').textContent = `🏆 ${gameState.teamNames[winnerIndex]} Wins!`;
+        document.getElementById('winner-title').innerHTML = `🏆 ${gameState.teamNames[winnerIndex]} <span data-i18n="teamWins">${translations[gameState.language].teamWins}</span>!`;
         document.getElementById('winner-message').textContent = 
-            `${gameState.teamNames[winnerIndex]} has reached ${gameState.scores[winnerIndex]} points.\nWould you like to continue playing or reset the game?`;
+            `${gameState.teamNames[winnerIndex]} ${translations[gameState.language].hasReached} ${gameState.scores[winnerIndex]} ${translations[gameState.language].points}.\n${translations[gameState.language].continueQuestion}`;
         
         winnerModal.show();
+    }
+
+    // Show toast notification
+    function showToast(message) {
+        const toastContainer = document.querySelector('.toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast show';
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        toast.innerHTML = `
+            <div class="toast-body">
+                ${message}
+            </div>
+        `;
+        toastContainer.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // Translate the page
+    function translatePage(lang) {
+        gameState.language = lang;
+        localStorage.setItem('language', lang);
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang][key]) {
+                if (el.tagName === 'INPUT' && el.type === 'text') {
+                    el.placeholder = translations[lang][key];
+                } else {
+                    el.textContent = translations[lang][key];
+                }
+            }
+        });
+        
+        // Update UI if game is in progress
+        if (gameState.teams > 0) {
+            updateUI();
+        }
+    }
+
+    // Export game data
+    function exportGame() {
+        const data = JSON.stringify(gameState);
+        const blob = new Blob([data], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `buraco-game-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        
+        showToast(translations[gameState.language].gameExported);
+    }
+
+    // Import game data
+    function importGame(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                Object.assign(gameState, data);
+                saveGameState();
+                showGame();
+                showToast(translations[gameState.language].gameImported);
+            } catch (err) {
+                console.error('Invalid game file', err);
+                showToast("Error: " + translations[gameState.language].invalidFile);
+            }
+        };
+        reader.readAsText(file);
     }
 
     // Event listeners
@@ -503,6 +819,37 @@
         saveGameState();
         winnerModal.hide();
         updateUI();
+    });
+
+    undoBtn.addEventListener('click', function() {
+        undoLastRound();
+    });
+
+    themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        gameState.darkMode = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', gameState.darkMode);
+        this.textContent = gameState.darkMode ? '☀️' : '🌙';
+    });
+
+    languageSelect.addEventListener('change', function() {
+        translatePage(this.value);
+        updateLanguageSelectorFlag();
+    });
+
+    exportBtn.addEventListener('click', function() {
+        exportGame();
+    });
+
+    importBtn.addEventListener('click', function() {
+        importInput.click();
+    });
+
+    importInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            importGame(this.files[0]);
+            this.value = ''; // Reset input
+        }
     });
 
     // Initialize the game when page loads
