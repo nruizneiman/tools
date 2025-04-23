@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Buraco Counter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .toggle-btn input[type="radio"] {
+            display: none;
+        }
+
+        .toggle-btn label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .toggle-btn .btn-check:checked + .btn {
+            border-width: 2px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+
+    <h1 class="text-center mb-4">🃏 Buraco Score Counter</h1>
+
+    <div id="setup-form" class="card mx-auto" style="max-width: 400px; display: none;">
+        <div class="card-body">
+            <form id="game-setup">
+                <div class="mb-3">
+                    <label class="form-label">Number of Teams</label>
+                    <input type="number" id="teams" name="teams" class="form-control" min="2" value="2" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Goal Points</label>
+                    <input type="number" id="goal" name="goal" class="form-control" value="3000" required>
+                </div>
+                <button class="btn btn-primary w-100" type="submit">Start Game</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="game-container" style="display: none;">
+        <h4 class="text-center mb-3" id="goal-display">Goal: 3000 points</h4>
+
+        <div class="table-responsive">
+            <table class="table table-bordered text-center align-middle">
+                <thead class="table-dark">
+                    <tr id="table-header">
+                        <th>Round</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                </tbody>
+                <tfoot class="table-secondary fw-bold">
+                    <tr id="total-row">
+                        <td>Total</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPointsModal">Add/Subtract Points</button>
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#renameTeamsModal">Rename Teams</button>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#resetConfirmModal">Reset Game</button>
+        </div>
+
+        <!-- Add/Subtract Points Modal -->
+        <div class="modal fade" id="addPointsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="update-scores-form" class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Enter Round Points</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="points-input-container">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit Round</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Reset Confirmation Modal -->
+        <div class="modal fade" id="resetConfirmModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-danger">Are you sure?</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        This will reset all scores and game settings.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="confirm-reset" class="btn btn-danger">Yes, Reset</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rename Teams Modal -->
+        <div class="modal fade" id="renameTeamsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="rename-teams-form" class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Rename Teams</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="team-names-container">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Winner Modal (hidden by default) -->
+    <div class="modal fade" id="winnerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="winner-title">🏆 Team Wins!</h5>
+                </div>
+                <div class="modal-body" id="winner-message">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirm-reset-winner" class="btn btn-danger">Reset Game</button>
+                    <button type="button" id="continue-playing" class="btn btn-secondary">Continue Playing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Game state
+    const gameState = {
+        teams: 0,
+        goal: 0,
+        scores: [],
+        history: [],
+        winner: null,
+        teamNames: [],
+        continuePlaying: false
+    };
+
+    // DOM elements
+    const setupForm = document.getElementById('setup-form');
+    const gameContainer = document.getElementById('game-container');
+    const gameSetupForm = document.getElementById('game-setup');
+    const updateScoresForm = document.getElementById('update-scores-form');
+    const renameTeamsForm = document.getElementById('rename-teams-form');
+    const confirmResetBtn = document.getElementById('confirm-reset');
+    const confirmResetWinnerBtn = document.getElementById('confirm-reset-winner');
+    const continuePlayingBtn = document.getElementById('continue-playing');
+    const winnerModal = new bootstrap.Modal(document.getElementById('winnerModal'));
+
+    // Initialize the game
+    function initGame() {
+        // Load from localStorage if available
+        const savedGame = localStorage.getItem('buracoGame');
+        if (savedGame) {
+            const parsed = JSON.parse(savedGame);
+            Object.assign(gameState, parsed);
+            
+            if (gameState.continuePlaying) {
+                gameState.winner = null;
+                gameState.continuePlaying = false;
+                saveGameState();
+            }
+            
+            if (gameState.teams > 0) {
+                showGame();
+                return;
+            }
+        }
+        
+        // Show setup form if no saved game
+        setupForm.style.display = 'block';
+    }
+
+    // Save game state to localStorage
+    function saveGameState() {
+        localStorage.setItem('buracoGame', JSON.stringify(gameState));
+    }
+
+    // Start the game
+    function startGame(teams, goal) {
+        gameState.teams = teams;
+        gameState.goal = goal;
+        gameState.scores = new Array(teams).fill(0);
+        gameState.history = [];
+        gameState.winner = null;
+        gameState.teamNames = Array.from({length: teams}, (_, i) => `Team ${i + 1}`);
+        gameState.continuePlaying = false;
+        
+        saveGameState();
+        showGame();
+    }
+
+    // Show the game interface
+    function showGame() {
+        setupForm.style.display = 'none';
+        gameContainer.style.display = 'block';
+        
+        updateUI();
+    }
+
+    // Reset the game
+    function resetGame() {
+        localStorage.removeItem('buracoGame');
+        gameState.teams = 0;
+        gameState.goal = 0;
+        gameState.scores = [];
+        gameState.history = [];
+        gameState.winner = null;
+        gameState.teamNames = [];
+        gameState.continuePlaying = false;
+        
+        gameContainer.style.display = 'none';
+        setupForm.style.display = 'block';
+    }
+
+    // Update the UI based on game state
+    function updateUI() {
+        // Update goal display
+        document.getElementById('goal-display').textContent = `Goal: ${gameState.goal} points`;
+        
+        // Update table header
+        const tableHeader = document.getElementById('table-header');
+        tableHeader.innerHTML = '<th>Round</th>';
+        gameState.teamNames.forEach(name => {
+            tableHeader.innerHTML += `<th>${name}</th>`;
+        });
+        
+        // Update history body
+        const historyBody = document.getElementById('history-body');
+        historyBody.innerHTML = '';
+        gameState.history.forEach((round, roundIndex) => {
+            let row = '<tr><td>' + (roundIndex + 1) + '</td>';
+            round.forEach(value => {
+                row += `<td>${value}</td>`;
+            });
+            row += '</tr>';
+            historyBody.innerHTML += row;
+        });
+        
+        // Update totals row
+        const totalRow = document.getElementById('total-row');
+        totalRow.innerHTML = '<td>Total</td>';
+        gameState.scores.forEach(score => {
+            totalRow.innerHTML += `<td>${score}</td>`;
+        });
+        
+        // Update points input modal
+        updatePointsInputModal();
+        
+        // Update rename teams modal
+        updateRenameTeamsModal();
+        
+        // Check for winner
+        checkWinner();
+    }
+
+    // Update the points input modal
+    function updatePointsInputModal() {
+        const container = document.getElementById('points-input-container');
+        container.innerHTML = '';
+        
+        gameState.teamNames.forEach((name, i) => {
+            container.innerHTML += `
+                <div class="mb-3">
+                    <label class="form-label">${name} (Team ${i + 1})</label>
+                    <div class="input-group">
+                        <div class="btn-group toggle-btn me-2" role="group">
+                            <input type="radio" class="btn-check" name="signs[${i}]" id="neg${i}" value="negative">
+                            <label class="btn btn-outline-danger rounded-pill" for="neg${i}">−</label>
+
+                            <input type="radio" class="btn-check" name="signs[${i}]" id="pos${i}" value="positive" checked>
+                            <label class="btn btn-outline-success rounded-pill" for="pos${i}">+</label>
+                        </div>
+                        <input type="number" name="round_points[${i}]" class="form-control" value="0" required>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // Update the rename teams modal
+    function updateRenameTeamsModal() {
+        const container = document.getElementById('team-names-container');
+        container.innerHTML = '';
+        
+        gameState.teamNames.forEach((name, i) => {
+            container.innerHTML += `
+                <div class="mb-3">
+                    <label class="form-label">${gameState.teamNames[i]} (Team ${i + 1})</label>
+                    <input type="text" name="team_names[${i}]" class="form-control" value="${name}">
+                </div>
+            `;
+        });
+    }
+
+    // Add a new round of scores
+    function addRound(points) {
+        const round = [];
+        points.forEach((value, i) => {
+            const sign = document.querySelector(`input[name="signs[${i}]"]:checked`).value;
+            const pointsValue = sign === 'negative' ? -Math.abs(value) : Math.abs(value);
+            gameState.scores[i] += pointsValue;
+            round.push(pointsValue);
+        });
+        
+        gameState.history.push(round);
+        saveGameState();
+        updateUI();
+    }
+
+    // Rename teams
+    function renameTeams(names) {
+        gameState.teamNames = names.map((name, i) => name.trim() || `Team ${i + 1}`);
+        saveGameState();
+        updateUI();
+    }
+
+    // Check if there's a winner
+    function checkWinner() {
+        if (gameState.winner !== null) return;
+        
+        for (let i = 0; i < gameState.scores.length; i++) {
+            if (gameState.scores[i] >= gameState.goal) {
+                gameState.winner = i;
+                showWinnerModal(i);
+                saveGameState();
+                break;
+            }
+        }
+    }
+
+    // Show winner modal
+    function showWinnerModal(winnerIndex) {
+        document.getElementById('winner-title').textContent = `🏆 ${gameState.teamNames[winnerIndex]} Wins!`;
+        document.getElementById('winner-message').textContent = 
+            `${gameState.teamNames[winnerIndex]} has reached ${gameState.scores[winnerIndex]} points.\nWould you like to continue playing or reset the game?`;
+        
+        winnerModal.show();
+    }
+
+    // Event listeners
+    gameSetupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const teams = parseInt(document.getElementById('teams').value);
+        const goal = parseInt(document.getElementById('goal').value);
+        startGame(teams, goal);
+    });
+
+    updateScoresForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const points = [];
+        
+        for (let i = 0; i < gameState.teams; i++) {
+            points.push(parseInt(formData.get(`round_points[${i}]`)));
+        }
+        
+        addRound(points);
+        
+        // Hide modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addPointsModal'));
+        modal.hide();
+        
+        // Reset form
+        this.reset();
+    });
+
+    renameTeamsForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const names = [];
+        
+        for (let i = 0; i < gameState.teams; i++) {
+            names.push(formData.get(`team_names[${i}]`));
+        }
+        
+        renameTeams(names);
+        
+        // Hide modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('renameTeamsModal'));
+        modal.hide();
+    });
+
+    confirmResetBtn.addEventListener('click', function() {
+        resetGame();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('resetConfirmModal'));
+        modal.hide();
+    });
+
+    confirmResetWinnerBtn.addEventListener('click', function() {
+        resetGame();
+        winnerModal.hide();
+    });
+
+    continuePlayingBtn.addEventListener('click', function() {
+        gameState.continuePlaying = true;
+        saveGameState();
+        winnerModal.hide();
+        updateUI();
+    });
+
+    // Initialize the game when page loads
+    document.addEventListener('DOMContentLoaded', initGame);
+</script>
+</body>
+</html>
