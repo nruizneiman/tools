@@ -223,6 +223,15 @@
             // Initialize
             setupEventListeners();
             toggleWordWrap(); // Set initial wrap state
+
+            function updateDiffStats(stats) {
+                diffStats.innerHTML = `
+                    <span class="badge bg-info text-dark stats-badge">Differences: ${stats.differences}</span>
+                    <span class="badge bg-success stats-badge">Added: ${stats.added}</span>
+                    <span class="badge bg-danger stats-badge">Removed: ${stats.removed}</span>
+                    <span class="badge bg-secondary stats-badge">Unchanged: ${stats.unchanged}</span>
+                `;
+            }
             
             function setupEventListeners() {
                 // Text area events
