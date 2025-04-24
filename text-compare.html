@@ -222,7 +222,57 @@
             
             // Initialize
             setupEventListeners();
-            toggleWordWrap(); // Set initial wrap state
+            toggleWordWrap();
+
+            function setupEventListeners() {
+                originalText.addEventListener('input', updateTextStats);
+                modifiedText.addEventListener('input', updateTextStats);
+                compareBtn.addEventListener('click', compareTexts);
+                clearBtn.addEventListener('click', clearAll);
+                wordWrapCheckbox.addEventListener('change', toggleWordWrap);
+                prevDiffOriginal.addEventListener('click', () => navigateDiff(-1));
+                nextDiffOriginal.addEventListener('click', () => navigateDiff(1));
+                prevDiffModified.addEventListener('click', () => navigateDiff(-1));
+                nextDiffModified.addEventListener('click', () => navigateDiff(1));
+                originalText.addEventListener('scroll', handleScroll);
+                modifiedText.addEventListener('scroll', handleScroll);
+            }
+
+            function compareTexts() {
+                const text1 = originalText.value;
+                const text2 = modifiedText.value;
+                
+                if (!text1 && !text2) {
+                    alert('Please enter texts to compare');
+                    return;
+                }
+                
+                const options = {
+                    ignoreWhitespace: document.getElementById('ignoreWhitespace').checked,
+                    ignoreCase: document.getElementById('ignoreCase').checked,
+                    ignoreLineBreaks: document.getElementById('ignoreLineBreaks').checked,
+                    ignoreEmptyLines: document.getElementById('ignoreEmptyLines').checked,
+                    showLineNumbers: document.getElementById('showLineNumbers').checked,
+                    highlightInline: document.getElementById('highlightInline').checked
+                };
+                
+                const diffResult = generateDiff(text1, text2, options);
+                
+                diffElements = diffResult.diffElements;
+                diffContent.innerHTML = diffResult.html;
+                updateDiffStats(diffResult.stats);
+                diffResult.style.display = 'block'; // This line was causing the error
+                
+                if (diffResult.stats.differences > 0) {
+                    originalArrows.style.display = 'block';
+                    modifiedArrows.style.display = 'block';
+                    currentDiffIndex = -1;
+                    navigateDiff(1);
+                } else {
+                    originalArrows.style.display = 'none';
+                    modifiedArrows.style.display = 'none';
+                }
+            }
 
             function updateDiffStats(stats) {
                 diffStats.innerHTML = `
