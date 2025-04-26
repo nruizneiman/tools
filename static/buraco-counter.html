@@ -678,7 +678,7 @@
 
     // Show winner modal
     function showWinnerModal(winnerIndex) {
-        document.getElementById('winner-title').innerHTML = `🏆 ${gameState.teamNames[winnerIndex]} <span data-i18n="teamWins">${translations[gameState.language].teamWins}</span>!`;
+        document.getElementById('winner-title').innerHTML = `🏆 ${gameState.teamNames[winnerIndex]} <span data-i18n="teamWins">${translations[gameState.language].teamWins}</span>`;
         document.getElementById('winner-message').textContent = 
             `${gameState.teamNames[winnerIndex]} ${translations[gameState.language].hasReached} ${gameState.scores[winnerIndex]} ${translations[gameState.language].points}.\n${translations[gameState.language].continueQuestion}`;
         
