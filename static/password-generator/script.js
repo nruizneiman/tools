@@ -4,6 +4,14 @@ class PasswordGenerator {
         this.passwordHistory = [];
         this.maxHistorySize = 20;
         
+        // Cracking speed estimates (attempts per second)
+        this.crackingSpeeds = {
+            online: 1000,        // Online attack (throttled)
+            offline: 1000000000, // Offline attack (1 billion attempts/sec)
+            gpu: 10000000000,    // GPU attack (10 billion attempts/sec)
+            asic: 100000000000   // ASIC attack (100 billion attempts/sec)
+        };
+        
         this.init();
     }
 
@@ -130,6 +138,7 @@ class PasswordGenerator {
         let password = this.generatePasswordFromConfig(config);
         this.passwordOutput.value = password;
         this.updateStrengthIndicator(password);
+        this.updateCrackingTime(password);
         this.addToHistory(password);
     }
 
@@ -274,6 +283,138 @@ class PasswordGenerator {
         this.strengthText.textContent = `Strength: ${strength.level.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
     }
 
+    updateCrackingTime(password) {
+        const charsetSize = this.calculateCharsetSize();
+        const passwordLength = password.length;
+        const totalCombinations = Math.pow(charsetSize, passwordLength);
+        
+        // Calculate cracking times for different attack methods
+        const crackingTimes = {};
+        
+        for (const [method, speed] of Object.entries(this.crackingSpeeds)) {
+            const seconds = totalCombinations / speed;
+            crackingTimes[method] = this.formatTime(seconds);
+        }
+        
+        // Update the UI with cracking time information
+        this.displayCrackingTimes(crackingTimes, totalCombinations);
+    }
+
+    calculateCharsetSize() {
+        const config = this.getConfiguration();
+        let charset = '';
+        
+        if (config.uppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        if (config.lowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+        if (config.numbers) charset += '0123456789';
+        if (config.symbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+        if (config.customChars) charset += config.customChars;
+        
+        // Apply exclusions
+        if (config.excludeSimilar) {
+            charset = charset.replace(/[l1IO0]/g, '');
+        }
+        if (config.excludeAmbiguous) {
+            charset = charset.replace(/[{}[\]()/\\|`~]/g, '');
+        }
+        
+        // Remove duplicates
+        charset = [...new Set(charset)].join('');
+        
+        return charset.length;
+    }
+
+    formatTime(seconds) {
+        if (seconds < 1) {
+            return 'Instantly';
+        }
+        
+        if (seconds < 60) {
+            return `${Math.ceil(seconds)} seconds`;
+        }
+        
+        const minutes = seconds / 60;
+        if (minutes < 60) {
+            return `${Math.ceil(minutes)} minutes`;
+        }
+        
+        const hours = minutes / 60;
+        if (hours < 24) {
+            return `${Math.ceil(hours)} hours`;
+        }
+        
+        const days = hours / 24;
+        if (days < 365) {
+            return `${Math.ceil(days)} days`;
+        }
+        
+        const years = days / 365;
+        if (years < 1000) {
+            return `${Math.ceil(years)} years`;
+        }
+        
+        const millennia = years / 1000;
+        if (millennia < 1000000) {
+            return `${Math.ceil(millennia)} millennia`;
+        }
+        
+        return 'Uncrackable';
+    }
+
+    displayCrackingTimes(crackingTimes, totalCombinations) {
+        // Create or update the cracking time display
+        let crackingTimeDisplay = document.getElementById('crackingTimeDisplay');
+        
+        if (!crackingTimeDisplay) {
+            // Create the display if it doesn't exist
+            const passwordSection = document.querySelector('.password-section');
+            const strengthDiv = document.querySelector('.password-strength');
+            
+            crackingTimeDisplay = document.createElement('div');
+            crackingTimeDisplay.id = 'crackingTimeDisplay';
+            crackingTimeDisplay.className = 'cracking-time';
+            
+            // Insert after the strength indicator
+            strengthDiv.parentNode.insertBefore(crackingTimeDisplay, strengthDiv.nextSibling);
+        }
+        
+        // Format the total combinations
+        const formattedCombinations = this.formatLargeNumber(totalCombinations);
+        
+        // Create the HTML content
+        crackingTimeDisplay.innerHTML = `
+            <div class="cracking-info">
+                <div class="combinations">Possible combinations: ${formattedCombinations}</div>
+                <div class="cracking-methods">
+                    <div class="method">
+                        <span class="method-name">Online Attack:</span>
+                        <span class="method-time">${crackingTimes.online}</span>
+                    </div>
+                    <div class="method">
+                        <span class="method-name">Offline Attack:</span>
+                        <span class="method-time">${crackingTimes.offline}</span>
+                    </div>
+                    <div class="method">
+                        <span class="method-name">GPU Attack:</span>
+                        <span class="method-time">${crackingTimes.gpu}</span>
+                    </div>
+                    <div class="method">
+                        <span class="method-name">ASIC Attack:</span>
+                        <span class="method-time">${crackingTimes.asic}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    formatLargeNumber(num) {
+        if (num < 1000) return num.toString();
+        if (num < 1000000) return (num / 1000).toFixed(1) + 'K';
+        if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num < 1000000000000) return (num / 1000000000).toFixed(1) + 'B';
+        return (num / 1000000000000).toFixed(1) + 'T';
+    }
+
     calculatePasswordStrength(password) {
         let score = 0;
         let feedback = [];
@@ -370,6 +511,7 @@ class PasswordGenerator {
     copyFromHistory(password) {
         this.passwordOutput.value = password;
         this.updateStrengthIndicator(password);
+        this.updateCrackingTime(password);
         this.showNotification('Password loaded from history!', 'success');
     }
 
