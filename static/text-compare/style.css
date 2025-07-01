@@ -1,0 +1,435 @@
+/* CSS Variables for theming */
+:root {
+    /* Light theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f3f3f3;
+    --bg-tertiary: #e8e8e8;
+    --text-primary: #1e1e1e;
+    --text-secondary: #6e6e6e;
+    --border-color: #d4d4d4;
+    --border-focus: #007acc;
+    --editor-bg: #ffffff;
+    --line-number-bg: #f3f3f3;
+    --line-number-color: #858585;
+    --gutter-bg: #f3f3f3;
+    --gutter-border: #e0e0e0;
+    
+    /* Diff colors */
+    --diff-added-bg: #e6ffed;
+    --diff-added-border: #a3d9a4;
+    --diff-removed-bg: #ffe6e6;
+    --diff-removed-border: #f4a3a3;
+    --diff-modified-bg: #fff3cd;
+    --diff-modified-border: #ffeaa7;
+    --diff-added-text: #22863a;
+    --diff-removed-text: #cb2431;
+    
+    /* Button colors */
+    --btn-primary-bg: #007acc;
+    --btn-primary-text: #ffffff;
+    --btn-secondary-bg: #f3f3f3;
+    --btn-secondary-text: #1e1e1e;
+    --btn-hover-bg: #005a9e;
+    --btn-secondary-hover-bg: #e0e0e0;
+}
+
+[data-theme="dark"] {
+    /* Dark theme */
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --bg-tertiary: #2d2d30;
+    --text-primary: #cccccc;
+    --text-secondary: #969696;
+    --border-color: #3c3c3c;
+    --border-focus: #007acc;
+    --editor-bg: #1e1e1e;
+    --line-number-bg: #252526;
+    --line-number-color: #858585;
+    --gutter-bg: #252526;
+    --gutter-border: #3c3c3c;
+    
+    /* Diff colors for dark theme */
+    --diff-added-bg: #0c2b0c;
+    --diff-added-border: #1b4f1b;
+    --diff-removed-bg: #2b0c0c;
+    --diff-removed-border: #4f1b1b;
+    --diff-modified-bg: #2b2b0c;
+    --diff-modified-border: #4f4f1b;
+    --diff-added-text: #4ec9b0;
+    --diff-removed-text: #f44747;
+    
+    /* Button colors for dark theme */
+    --btn-primary-bg: #007acc;
+    --btn-primary-text: #ffffff;
+    --btn-secondary-bg: #3c3c3c;
+    --btn-secondary-text: #cccccc;
+    --btn-hover-bg: #005a9e;
+    --btn-secondary-hover-bg: #4c4c4c;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Toolbar */
+.toolbar {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-height: 48px;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+    border-right: 1px solid var(--border-color);
+}
+
+.toolbar-group:last-child {
+    border-right: none;
+}
+
+.btn {
+    background-color: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn:hover {
+    background-color: var(--btn-secondary-hover-bg);
+}
+
+.btn.active {
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border-color: var(--btn-primary-bg);
+}
+
+.btn-primary {
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-hover-bg);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin: 0;
+}
+
+.font-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.font-size-controls button {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Main container */
+.main-container {
+    display: flex;
+    height: calc(100vh - 48px);
+    position: relative;
+}
+
+/* Editor container */
+.editor-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+}
+
+.editor-container:last-child {
+    border-right: none;
+}
+
+.editor-header {
+    background-color: var(--bg-tertiary);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.editor-wrapper {
+    flex: 1;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Line numbers */
+.line-numbers {
+    background-color: var(--line-number-bg);
+    border-right: 1px solid var(--gutter-border);
+    padding: 8px 0;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    color: var(--line-number-color);
+    text-align: right;
+    user-select: none;
+    min-width: 50px;
+    overflow-y: hidden;
+}
+
+.line-number {
+    padding: 0 8px;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+/* Gutter */
+.gutter {
+    background-color: var(--gutter-bg);
+    border-right: 1px solid var(--gutter-border);
+    width: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.gutter-marker {
+    width: 12px;
+    height: 12px;
+    margin: 4px 0;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: bold;
+    color: white;
+}
+
+.gutter-marker.added {
+    background-color: var(--diff-added-text);
+}
+
+.gutter-marker.removed {
+    background-color: var(--diff-removed-text);
+}
+
+.gutter-marker.modified {
+    background-color: #f39c12;
+}
+
+/* Text editor */
+.text-editor {
+    flex: 1;
+    background-color: var(--editor-bg);
+    color: var(--text-primary);
+    border: none;
+    outline: none;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 8px 12px;
+    resize: none;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.text-editor:focus {
+    border: 1px solid var(--border-focus);
+}
+
+/* Diff highlighting */
+.diff-line {
+    position: relative;
+}
+
+.diff-line.added {
+    background-color: var(--diff-added-bg);
+    border-left: 3px solid var(--diff-added-border);
+}
+
+.diff-line.removed {
+    background-color: var(--diff-removed-bg);
+    border-left: 3px solid var(--diff-removed-border);
+}
+
+.diff-line.modified {
+    background-color: var(--diff-modified-bg);
+    border-left: 3px solid var(--diff-modified-border);
+}
+
+.diff-word {
+    padding: 1px 2px;
+    border-radius: 2px;
+}
+
+.diff-word.added {
+    background-color: var(--diff-added-text);
+    color: white;
+}
+
+.diff-word.removed {
+    background-color: var(--diff-removed-text);
+    color: white;
+    text-decoration: line-through;
+}
+
+/* Status bar */
+.status-bar {
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 4px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    height: 24px;
+}
+
+.status-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Navigation controls */
+.nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nav-controls button {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font-size: 10px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .toolbar-group {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 8px;
+    }
+
+    .toolbar-group:last-child {
+        border-bottom: none;
+    }
+
+    .main-container {
+        flex-direction: column;
+        height: calc(100vh - 120px);
+    }
+
+    .editor-container {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .editor-container:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Scrollbar styling */
+.text-editor::-webkit-scrollbar {
+    width: 12px;
+}
+
+.text-editor::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.text-editor::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 6px;
+}
+
+.text-editor::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* File upload */
+.file-upload {
+    display: none;
+}
+
+/* Loading indicator */
+.loading {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-secondary);
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    z-index: 1000;
+}
+
+.loading.show {
+    display: block;
+}
+
+/* Sample text */
+.sample-text {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 20px;
+    white-space: pre;
+} 

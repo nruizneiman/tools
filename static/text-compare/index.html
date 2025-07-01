@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Compare Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <button class="btn btn-primary" id="loadLeftFile">
+                📁 Load Left File
+            </button>
+            <button class="btn btn-primary" id="loadRightFile">
+                📁 Load Right File
+            </button>
+            <input type="file" id="leftFileInput" class="file-upload" accept=".txt,.js,.py,.java,.cpp,.c,.html,.css,.json,.xml,.md">
+            <input type="file" id="rightFileInput" class="file-upload" accept=".txt,.js,.py,.java,.cpp,.c,.html,.css,.json,.xml,.md">
+        </div>
+
+        <div class="toolbar-group">
+            <button class="btn" id="exportDiff">
+                📄 Export Diff
+            </button>
+            <button class="btn" id="exportUnified">
+                📄 Export Unified
+            </button>
+        </div>
+
+        <div class="toolbar-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="toggleLineNumbers" checked>
+                <label for="toggleLineNumbers">Line Numbers</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="toggleGutter" checked>
+                <label for="toggleGutter">Gutter</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="toggleInlineDiff" checked>
+                <label for="toggleInlineDiff">Inline Diff</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="toggleSyncScroll" checked>
+                <label for="toggleSyncScroll">Sync Scroll</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="toggleDarkMode">
+                <label for="toggleDarkMode">Dark Mode</label>
+            </div>
+        </div>
+
+        <div class="toolbar-group">
+            <div class="font-size-controls">
+                <button class="btn" id="decreaseFont">A-</button>
+                <span id="fontSizeDisplay">14</span>
+                <button class="btn" id="increaseFont">A+</button>
+            </div>
+        </div>
+
+        <div class="toolbar-group">
+            <button class="btn" id="toggleFullscreen">
+                ⛶ Fullscreen
+            </button>
+        </div>
+    </div>
+
+    <!-- Main container -->
+    <div class="main-container">
+        <!-- Left editor -->
+        <div class="editor-container">
+            <div class="editor-header">Left File</div>
+            <div class="editor-wrapper">
+                <div class="line-numbers" id="leftLineNumbers"></div>
+                <div class="gutter" id="leftGutter"></div>
+                <textarea class="text-editor" id="leftEditor" placeholder="Enter or paste text here..."></textarea>
+            </div>
+        </div>
+
+        <!-- Right editor -->
+        <div class="editor-container">
+            <div class="editor-header">Right File</div>
+            <div class="editor-wrapper">
+                <div class="line-numbers" id="rightLineNumbers"></div>
+                <div class="gutter" id="rightGutter"></div>
+                <textarea class="text-editor" id="rightEditor" placeholder="Enter or paste text here..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span>Left: <span id="leftLineCount">0</span> lines</span>
+            <span>Right: <span id="rightLineCount">0</span> lines</span>
+            <span>Differences: <span id="diffCount">0</span></span>
+        </div>
+        <div class="status-right">
+            <div class="nav-controls">
+                <button class="btn" id="prevDiff" title="Previous diff (Shift+F3)">◀</button>
+                <button class="btn" id="nextDiff" title="Next diff (F3)">▶</button>
+            </div>
+            <span>Ctrl+Enter: Diff | F3: Next | Shift+F3: Prev | Ctrl+S: Export | F11: Fullscreen</span>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading" id="loading">
+        Processing...
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
