@@ -131,9 +131,6 @@ body {
     z-index: 1055; /* Ensure toast is above other elements */
 }
 
-#game-container {
-    /* display: none; // Controlled by JS */
-}
 
 /* Prevent zoom on input focus on mobile */
 input, select, textarea {
