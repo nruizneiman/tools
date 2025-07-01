@@ -13,6 +13,241 @@
     <title>Buraco Counter - Simple and Smart Tracking</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* CSS Variables for theming */
+        :root {
+            /* Light theme variables */
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --border-color-dark: #adb5bd;
+            --card-bg: #ffffff;
+            --modal-bg: #ffffff;
+            --table-bg: #ffffff;
+            --table-header-bg: #212529;
+            --table-footer-bg: #6c757d;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --btn-close-filter: none;
+        }
+
+        /* Dark theme variables */
+        [data-theme="dark"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2c2c2c;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: #444;
+            --border-color-dark: #666;
+            --card-bg: #1e1e1e;
+            --modal-bg: #1e1e1e;
+            --table-bg: #1e1e1e;
+            --table-header-bg: #2c2c2c;
+            --table-footer-bg: #252525;
+            --input-bg: #2d2d2d;
+            --input-border: #444;
+            --btn-close-filter: invert(1);
+        }
+
+        /* Apply theme variables */
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .card, .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .table {
+            background-color: var(--table-bg);
+            color: var(--text-primary);
+        }
+
+        .table-dark {
+            background-color: var(--table-header-bg) !important;
+            color: var(--text-primary);
+        }
+
+        .table-secondary {
+            background-color: var(--table-footer-bg) !important;
+            color: var(--text-primary);
+        }
+
+        .form-control,
+        .form-select {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border-color: var(--input-border);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color-dark);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-close {
+            filter: var(--btn-close-filter);
+        }
+
+        .modal-header,
+        .modal-footer {
+            border-color: var(--border-color);
+        }
+
+        .table-bordered {
+            border-color: var(--border-color) !important;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border-color: var(--border-color) !important;
+        }
+
+        /* Additional dark mode overrides for Bootstrap components */
+        [data-theme="dark"] .bg-light {
+            background-color: var(--bg-primary) !important;
+        }
+
+        [data-theme="dark"] .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        [data-theme="dark"] .toast {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .toast-header {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .btn-outline-secondary {
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .btn-outline-secondary:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color-dark);
+        }
+
+        [data-theme="dark"] .btn-outline-secondary:focus {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color-dark);
+            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+        }
+
+        [data-theme="dark"] .btn-outline-danger {
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        [data-theme="dark"] .btn-outline-danger:hover {
+            background-color: #ff6b6b;
+            color: #fff;
+        }
+
+        [data-theme="dark"] .btn-outline-success {
+            color: #51cf66;
+            border-color: #51cf66;
+        }
+
+        [data-theme="dark"] .btn-outline-success:hover {
+            background-color: #51cf66;
+            color: #fff;
+        }
+
+        [data-theme="dark"] .btn-outline-warning {
+            color: #ffd43b;
+            border-color: #ffd43b;
+        }
+
+        [data-theme="dark"] .btn-outline-warning:hover {
+            background-color: #ffd43b;
+            color: #000;
+        }
+
+        [data-theme="dark"] .btn-outline-info {
+            color: #74c0fc;
+            border-color: #74c0fc;
+        }
+
+        [data-theme="dark"] .btn-outline-info:hover {
+            background-color: #74c0fc;
+            color: #fff;
+        }
+
+        [data-theme="dark"] .form-label {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .modal-title {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .text-danger {
+            color: #ff6b6b !important;
+        }
+
+        [data-theme="dark"] .text-success {
+            color: #51cf66 !important;
+        }
+
+        [data-theme="dark"] .text-warning {
+            color: #ffd43b !important;
+        }
+
+        [data-theme="dark"] .text-info {
+            color: #74c0fc !important;
+        }
+
+        /* Additional element overrides */
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6 {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .container {
+            background-color: var(--bg-primary);
+        }
+
+        [data-theme="dark"] .input-group-text {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--input-border);
+        }
+
+        [data-theme="dark"] .btn-group .btn {
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .btn-group .btn:not(:first-child) {
+            border-left-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .btn-group .btn:not(:last-child) {
+            border-right-color: var(--border-color);
+        }
+
+        /* Toggle button styles */
         .toggle-btn input[type="radio"] {
             display: none;
         }
@@ -24,60 +259,6 @@
 
         .toggle-btn .btn-check:checked + .btn {
             border-width: 2px;
-        }
-
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-
-        .dark-mode .card, 
-        .dark-mode .modal-content {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-            border-color: #444;
-        }
-
-        .dark-mode .table {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-
-        .dark-mode .table-dark {
-            background-color: #2c2c2c !important;
-            color: #e0e0e0;
-        }
-
-        .dark-mode .table-secondary {
-            background-color: #252525 !important;
-            color: #e0e0e0;
-        }
-
-        .dark-mode .form-control,
-        .dark-mode .form-select {
-            background-color: #2d2d2d;
-            color: #e0e0e0;
-            border-color: #444;
-        }
-
-        .dark-mode .btn-close {
-            filter: invert(1);
-        }
-
-        .dark-mode .modal-header,
-        .dark-mode .modal-footer {
-            border-color: #444;
-        }
-
-        /* Improved dark mode table colors */
-        .dark-mode .table-bordered {
-            border-color: #444 !important;
-        }
-
-        .dark-mode .table-bordered th,
-        .dark-mode .table-bordered td {
-            border-color: #444 !important;
         }
 
         /* Language selector flags */
@@ -490,7 +671,7 @@
     function loadPreferences() {
         // Dark mode
         if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
+            document.documentElement.setAttribute('data-theme', 'dark');
             gameState.darkMode = true;
             themeToggle.textContent = '☀️';
         }
@@ -833,10 +1014,17 @@
     });
 
     themeToggle.addEventListener('click', function() {
-        document.body.classList.toggle('dark-mode');
-        gameState.darkMode = document.body.classList.contains('dark-mode');
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            gameState.darkMode = false;
+            this.textContent = '🌙';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            gameState.darkMode = true;
+            this.textContent = '☀️';
+        }
         localStorage.setItem('darkMode', gameState.darkMode);
-        this.textContent = gameState.darkMode ? '☀️' : '🌙';
     });
 
     languageSelect.addEventListener('change', function() {
