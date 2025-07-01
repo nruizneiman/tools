@@ -24,7 +24,7 @@
     --color-bg-crossed-out: #e9ecef; /* Light theme crossed-out background */
 }
 
-body.dark-mode {
+[data-theme="dark"] {
     --color-bg-body: #121212;
     --color-text-body: #e0e0e0;
     --color-bg-card: #1e1e1e;
@@ -35,16 +35,16 @@ body.dark-mode {
     --color-border-input: #444444;
 
     /* Adjusted for dark mode based on existing .dark-mode .btn-outline-secondary */
-    --color-btn-outline-secondary-text: #6c757d; /* Original color seems fine for text */
-    --color-btn-outline-secondary-border: #6c757d; /* Original color seems fine for border */
-    --color-btn-outline-secondary-hover-bg: #6c757d; /* Original color seems fine for hover bg */
-    --color-btn-outline-secondary-hover-text: #ffffff; /* Original color seems fine for hover text */
+    --color-btn-outline-secondary-text: #e0e0e0;
+    --color-btn-outline-secondary-border: #888;
+    --color-btn-outline-secondary-hover-bg: #444;
+    --color-btn-outline-secondary-hover-text: #fff;
     
     /* Adjusted for dark mode based on existing .dark-mode .btn-outline-primary */
-    --color-btn-outline-primary-text: #0d6efd; /* Original color seems fine */
-    --color-btn-outline-primary-border: #0d6efd; /* Original color seems fine */
-    --color-btn-outline-primary-hover-bg: #0d6efd; /* Original color seems fine */
-    --color-btn-outline-primary-hover-text: #ffffff; /* Original color seems fine */
+    --color-btn-outline-primary-text: #90caf9;
+    --color-btn-outline-primary-border: #90caf9;
+    --color-btn-outline-primary-hover-bg: #1976d2;
+    --color-btn-outline-primary-hover-text: #fff;
     
     --color-btn-close-filter: invert(1) grayscale(100%) brightness(200%);
     --color-bg-crossed-out: #3a3a3a; /* Dark theme crossed-out background */
@@ -59,6 +59,7 @@ body {
     background-color: var(--color-bg-card);
     border-color: var(--color-border-default);
     /* Text color for these elements will be inherited from body or set by BS default */
+    color: var(--color-text-body);
 }
 
 .modal-content { /* Modal content text should also follow body text */
@@ -67,13 +68,50 @@ body {
 
 .table {
     color: var(--color-text-table);
-    /* border-color for table itself and cells can be more specific if needed */
+    background-color: var(--color-bg-card);
+    border-color: var(--color-border-default);
+}
+
+.table-bordered {
+    border-color: var(--color-border-default) !important;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border-color: var(--color-border-default) !important;
+}
+
+.table tr, .table th, .table td {
+    background-color: var(--color-bg-card);
+    color: var(--color-text-body);
+}
+
+[data-theme="dark"] .table tr, [data-theme="dark"] .table th, [data-theme="dark"] .table td {
+    background-color: var(--color-bg-card) !important;
+    color: var(--color-text-body) !important;
+}
+
+.table-dark {
+    background-color: var(--color-bg-card) !important;
+    color: var(--color-text-body) !important;
+}
+
+.table-secondary {
+    background-color: var(--color-bg-input) !important;
+    color: var(--color-text-body) !important;
 }
 
 .form-control, .form-select {
     background-color: var(--color-bg-input);
     color: var(--color-text-input);
     border-color: var(--color-border-input);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--color-bg-input);
+    color: var(--color-text-input);
+    border-color: var(--color-border-default);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .btn-outline-primary {
@@ -116,8 +154,16 @@ body {
 
 .crossed-out-input {
     text-decoration: line-through;
-    background-color: var(--color-bg-crossed-out) !important; /* Use important to override Bootstrap default form-control bg */
-    /* Ensure text color is still readable on this new background if needed, though line-through helps */
+    background-color: var(--color-bg-crossed-out) !important;
+    color: var(--color-text-secondary) !important;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+[data-theme="dark"] .crossed-out-input {
+    background-color: var(--color-bg-crossed-out) !important;
+    color: var(--color-text-secondary) !important;
+    opacity: 0.6;
 }
 
 .language-flag {
@@ -145,4 +191,48 @@ input, select, textarea {
     h1 {
         font-size: 1.75rem;
     }
+}
+
+[data-theme="dark"] .bg-light {
+    background-color: var(--color-bg-body) !important;
+}
+
+[data-theme="dark"] .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="dark"] .toast {
+    background-color: var(--color-bg-card);
+    color: var(--color-text-body);
+    border-color: var(--color-border-default);
+}
+
+[data-theme="dark"] .toast-header {
+    background-color: var(--color-bg-input);
+    color: var(--color-text-body);
+    border-color: var(--color-border-default);
+}
+
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .modal-title,
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6 {
+    color: var(--color-text-body);
+}
+
+[data-theme="dark"] .input-group-text {
+    background-color: var(--color-bg-input);
+    color: var(--color-text-body);
+    border-color: var(--color-border-input);
+}
+
+[data-theme="dark"] .btn-group .btn {
+    border-color: var(--color-border-default);
+}
+
+[data-theme="dark"] .btn-group .btn:not(:first-child) {
+    border-left-color: var(--color-border-default);
+}
+
+[data-theme="dark"] .btn-group .btn:not(:last-child) {
+    border-right-color: var(--color-border-default);
 }

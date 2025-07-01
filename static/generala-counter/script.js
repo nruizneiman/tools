@@ -126,10 +126,10 @@ function loadGameState() {
 
 function applyTheme(isDark) {
     if (isDark) {
-        document.body.classList.add('dark-mode');
+        document.documentElement.setAttribute('data-theme', 'dark');
         themeToggleBtn.textContent = '☀️'; // Sun icon for light mode
     } else {
-        document.body.classList.remove('dark-mode');
+        document.documentElement.removeAttribute('data-theme');
         themeToggleBtn.textContent = '🌙'; // Moon icon for dark mode
     }
 }
