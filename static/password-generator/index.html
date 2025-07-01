@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔐 Password Generator</h1>
+            <p>Generate secure, customizable passwords</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Password Display -->
+            <div class="password-section">
+                <div class="password-display">
+                    <input type="text" id="passwordOutput" readonly placeholder="Generated password will appear here">
+                    <button id="copyPassword" class="btn btn-primary" title="Copy to clipboard">
+                        📋 Copy
+                    </button>
+                </div>
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div id="strengthIndicator" class="strength-fill"></div>
+                    </div>
+                    <span id="strengthText">Strength: Very Weak</span>
+                </div>
+            </div>
+
+            <!-- Configuration Panel -->
+            <div class="config-panel">
+                <div class="config-section">
+                    <h3>Password Length</h3>
+                    <div class="length-control">
+                        <input type="range" id="lengthSlider" min="4" max="128" value="16">
+                        <span id="lengthValue">16</span>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Character Types</h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="uppercase" checked>
+                            <span class="checkmark"></span>
+                            <span class="label-text">Uppercase Letters (A-Z)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="lowercase" checked>
+                            <span class="checkmark"></span>
+                            <span class="label-text">Lowercase Letters (a-z)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="numbers" checked>
+                            <span class="checkmark"></span>
+                            <span class="label-text">Numbers (0-9)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="symbols">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Symbols (!@#$%^&*)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Advanced Options</h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="excludeSimilar">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Exclude similar characters (l, 1, I, O, 0)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="excludeAmbiguous">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Exclude ambiguous characters ({}, [], (), /, \, |, `, ~)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="requireOneEach">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Require at least one of each selected type</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Custom Characters</h3>
+                    <div class="custom-chars">
+                        <input type="text" id="customChars" placeholder="Add custom characters (optional)">
+                        <small>These will be added to the character pool</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="generatePassword" class="btn btn-primary btn-large">
+                    🔄 Generate Password
+                </button>
+                <button id="generateMultiple" class="btn btn-secondary btn-large">
+                    📝 Generate Multiple
+                </button>
+            </div>
+
+            <!-- Password History -->
+            <div class="password-history">
+                <h3>Recent Passwords</h3>
+                <div id="passwordHistory" class="history-list">
+                    <!-- Generated passwords will appear here -->
+                </div>
+                <button id="clearHistory" class="btn btn-small">
+                    🗑️ Clear History
+                </button>
+            </div>
+
+            <!-- Password Templates -->
+            <div class="password-templates">
+                <h3>Quick Templates</h3>
+                <div class="template-buttons">
+                    <button class="btn btn-template" data-template="strong">Strong (16 chars)</button>
+                    <button class="btn btn-template" data-template="very-strong">Very Strong (32 chars)</button>
+                    <button class="btn btn-template" data-template="memorable">Memorable</button>
+                    <button class="btn btn-template" data-template="pin">PIN (6 digits)</button>
+                    <button class="btn btn-template" data-template="alphanumeric">Alphanumeric</button>
+                    <button class="btn btn-template" data-template="symbols-heavy">Symbols Heavy</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Multiple Passwords Modal -->
+        <div id="multipleModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Generate Multiple Passwords</h3>
+                    <button id="closeModal" class="btn-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="passwordCount">Number of passwords:</label>
+                        <input type="number" id="passwordCount" min="2" max="50" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="separator">Separator:</label>
+                        <select id="separator">
+                            <option value="\n">New line</option>
+                            <option value=", ">Comma</option>
+                            <option value=" | ">Pipe</option>
+                            <option value="\t">Tab</option>
+                        </select>
+                    </div>
+                    <div id="multiplePasswords" class="multiple-passwords">
+                        <!-- Generated passwords will appear here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="copyMultiple" class="btn btn-primary">Copy All</button>
+                    <button id="closeMultipleModal" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Notification -->
+        <div id="notification" class="notification">
+            <span id="notificationText"></span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
