@@ -7,6 +7,8 @@ class TextCompareTool {
         this.rightLineNumbers = null;
         this.leftGutter = null;
         this.rightGutter = null;
+        this.leftContainer = null;
+        this.rightContainer = null;
         this.diffResults = [];
         this.currentDiffIndex = -1;
         this.fontSize = 14;
@@ -15,6 +17,9 @@ class TextCompareTool {
         this.showInlineDiff = true;
         this.syncScroll = true;
         this.darkMode = false;
+        this.showWhitespace = true;
+        this.ignoreWhitespace = false;
+        this.ignoreCase = false;
         
         this.init();
     }
@@ -35,6 +40,45 @@ class TextCompareTool {
         this.rightLineNumbers = document.getElementById('rightLineNumbers');
         this.leftGutter = document.getElementById('leftGutter');
         this.rightGutter = document.getElementById('rightGutter');
+        
+        // Create containers for diff highlighting
+        this.leftContainer = document.createElement('div');
+        this.rightContainer = document.createElement('div');
+        this.leftContainer.className = 'editor-lines';
+        this.rightContainer.className = 'editor-lines';
+        
+        // Insert containers inside the editor wrapper, positioned over the textarea
+        this.leftEditor.parentNode.appendChild(this.leftContainer);
+        this.rightEditor.parentNode.appendChild(this.rightContainer);
+        
+        // Position containers to overlay only the textarea
+        this.updateContainerPosition();
+    }
+
+    updateContainerPosition() {
+        // Position the diff containers to overlay only the textarea area
+        const leftEditorRect = this.leftEditor.getBoundingClientRect();
+        const rightEditorRect = this.rightEditor.getBoundingClientRect();
+        const leftWrapperRect = this.leftEditor.parentNode.getBoundingClientRect();
+        const rightWrapperRect = this.rightEditor.parentNode.getBoundingClientRect();
+
+        // Calculate offset from wrapper to textarea
+        const leftOffset = leftEditorRect.left - leftWrapperRect.left;
+        const rightOffset = rightEditorRect.left - rightWrapperRect.left;
+        const topOffset = leftEditorRect.top - leftWrapperRect.top;
+
+        // Apply positioning
+        this.leftContainer.style.position = 'absolute';
+        this.leftContainer.style.left = leftOffset + 'px';
+        this.leftContainer.style.top = topOffset + 'px';
+        this.leftContainer.style.width = leftEditorRect.width + 'px';
+        this.leftContainer.style.height = leftEditorRect.height + 'px';
+
+        this.rightContainer.style.position = 'absolute';
+        this.rightContainer.style.left = rightOffset + 'px';
+        this.rightContainer.style.top = topOffset + 'px';
+        this.rightContainer.style.width = rightEditorRect.width + 'px';
+        this.rightContainer.style.height = rightEditorRect.height + 'px';
     }
 
     setupEventListeners() {
@@ -47,6 +91,10 @@ class TextCompareTool {
             if (this.syncScroll) {
                 this.rightEditor.scrollTop = this.leftEditor.scrollTop;
                 this.rightEditor.scrollLeft = this.leftEditor.scrollLeft;
+                this.leftContainer.scrollTop = this.leftEditor.scrollTop;
+                this.leftContainer.scrollLeft = this.leftEditor.scrollLeft;
+                this.rightContainer.scrollTop = this.rightEditor.scrollTop;
+                this.rightContainer.scrollLeft = this.rightEditor.scrollLeft;
             }
         });
 
@@ -54,7 +102,16 @@ class TextCompareTool {
             if (this.syncScroll) {
                 this.leftEditor.scrollTop = this.rightEditor.scrollTop;
                 this.leftEditor.scrollLeft = this.rightEditor.scrollLeft;
+                this.leftContainer.scrollTop = this.leftEditor.scrollTop;
+                this.leftContainer.scrollLeft = this.leftEditor.scrollLeft;
+                this.rightContainer.scrollTop = this.rightEditor.scrollTop;
+                this.rightContainer.scrollLeft = this.rightEditor.scrollLeft;
             }
+        });
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            setTimeout(() => this.updateContainerPosition(), 100);
         });
 
         // Toolbar controls
@@ -80,6 +137,22 @@ class TextCompareTool {
         document.getElementById('toggleDarkMode').addEventListener('change', (e) => {
             this.darkMode = e.target.checked;
             this.updateTheme();
+        });
+
+        // Whitespace controls
+        document.getElementById('toggleWhitespace').addEventListener('change', (e) => {
+            this.showWhitespace = e.target.checked;
+            this.performDiff();
+        });
+
+        document.getElementById('ignoreWhitespace').addEventListener('change', (e) => {
+            this.ignoreWhitespace = e.target.checked;
+            this.performDiff();
+        });
+
+        document.getElementById('ignoreCase').addEventListener('change', (e) => {
+            this.ignoreCase = e.target.checked;
+            this.performDiff();
         });
 
         // Font size controls
@@ -124,6 +197,9 @@ class TextCompareTool {
             this.showInlineDiff = prefs.showInlineDiff !== false;
             this.syncScroll = prefs.syncScroll !== false;
             this.darkMode = prefs.darkMode || false;
+            this.showWhitespace = prefs.showWhitespace !== false;
+            this.ignoreWhitespace = prefs.ignoreWhitespace || false;
+            this.ignoreCase = prefs.ignoreCase || false;
         }
     }
 
@@ -134,7 +210,10 @@ class TextCompareTool {
             showGutter: this.showGutter,
             showInlineDiff: this.showInlineDiff,
             syncScroll: this.syncScroll,
-            darkMode: this.darkMode
+            darkMode: this.darkMode,
+            showWhitespace: this.showWhitespace,
+            ignoreWhitespace: this.ignoreWhitespace,
+            ignoreCase: this.ignoreCase
         };
         localStorage.setItem('textComparePreferences', JSON.stringify(prefs));
     }
@@ -190,6 +269,9 @@ console.log("The result is: " + result);`;
         document.getElementById('toggleInlineDiff').checked = this.showInlineDiff;
         document.getElementById('toggleSyncScroll').checked = this.syncScroll;
         document.getElementById('toggleDarkMode').checked = this.darkMode;
+        document.getElementById('toggleWhitespace').checked = this.showWhitespace;
+        document.getElementById('ignoreWhitespace').checked = this.ignoreWhitespace;
+        document.getElementById('ignoreCase').checked = this.ignoreCase;
 
         // Update font size
         this.updateFontSize();
@@ -200,12 +282,16 @@ console.log("The result is: " + result);`;
         // Update line numbers
         this.updateLineNumbers();
 
+        // Update container positions after UI changes
+        setTimeout(() => this.updateContainerPosition(), 50);
+
         this.savePreferences();
     }
 
     updateFontSize() {
         const editors = [this.leftEditor, this.rightEditor];
         const lineNumberElements = [this.leftLineNumbers, this.rightLineNumbers];
+        const containers = [this.leftContainer, this.rightContainer];
 
         editors.forEach(editor => {
             editor.style.fontSize = `${this.fontSize}px`;
@@ -215,6 +301,11 @@ console.log("The result is: " + result);`;
         lineNumberElements.forEach(lineNumbers => {
             lineNumbers.style.fontSize = `${this.fontSize}px`;
             lineNumbers.style.lineHeight = `${this.fontSize + 6}px`;
+        });
+
+        containers.forEach(container => {
+            container.style.fontSize = `${this.fontSize}px`;
+            container.style.lineHeight = `${this.fontSize + 6}px`;
         });
 
         document.getElementById('fontSizeDisplay').textContent = this.fontSize;
@@ -248,11 +339,12 @@ console.log("The result is: " + result);`;
         // Clear previous diff highlighting
         this.clearDiffHighlighting();
 
-        // Perform line-by-line diff
-        const leftLines = leftText.split('\n');
-        const rightLines = rightText.split('\n');
+        // Normalize text based on settings
+        const leftLines = this.normalizeLines(leftText.split('\n'));
+        const rightLines = this.normalizeLines(rightText.split('\n'));
         
-        this.diffResults = this.computeDiff(leftLines, rightLines);
+        // Perform line-by-line diff
+        this.diffResults = this.computeLineDiff(leftLines, rightLines);
         
         // Apply diff highlighting
         this.applyDiffHighlighting();
@@ -267,18 +359,52 @@ console.log("The result is: " + result);`;
         this.updateStatus();
     }
 
-    computeDiff(leftLines, rightLines) {
-        // Simple Myers diff algorithm implementation
+    normalizeLines(lines) {
+        return lines.map(line => {
+            let normalized = line;
+            
+            if (this.ignoreCase) {
+                normalized = normalized.toLowerCase();
+            }
+            
+            if (this.ignoreWhitespace) {
+                normalized = normalized.trim();
+            }
+            
+            return normalized;
+        });
+    }
+
+    computeLineDiff(leftLines, rightLines) {
+        // Use Myers diff algorithm for line-level diffing
         const matrix = this.createDiffMatrix(leftLines, rightLines);
         const path = this.backtrack(matrix, leftLines, rightLines);
         
         return path.map(([op, leftIndex, rightIndex]) => {
             if (op === 'equal') {
-                return { type: 'equal', leftLine: leftLines[leftIndex], rightLine: rightLines[rightIndex] };
+                return { 
+                    type: 'equal', 
+                    leftLine: leftLines[leftIndex], 
+                    rightLine: rightLines[rightIndex],
+                    leftIndex,
+                    rightIndex
+                };
             } else if (op === 'delete') {
-                return { type: 'removed', leftLine: leftLines[leftIndex], rightLine: null };
+                return { 
+                    type: 'removed', 
+                    leftLine: leftLines[leftIndex], 
+                    rightLine: null,
+                    leftIndex,
+                    rightIndex: -1
+                };
             } else if (op === 'insert') {
-                return { type: 'added', leftLine: null, rightLine: rightLines[rightIndex] };
+                return { 
+                    type: 'added', 
+                    leftLine: null, 
+                    rightLine: rightLines[rightIndex],
+                    leftIndex: -1,
+                    rightIndex
+                };
             }
         });
     }
@@ -324,76 +450,93 @@ console.log("The result is: " + result);`;
     }
 
     clearDiffHighlighting() {
-        // Remove existing diff classes
-        const leftLines = this.leftEditor.value.split('\n');
-        const rightLines = this.rightEditor.value.split('\n');
-
-        // Clear line highlighting
-        this.leftEditor.innerHTML = leftLines.map(line => 
-            `<div class="line">${this.escapeHtml(line)}</div>`
-        ).join('');
-
-        this.rightEditor.innerHTML = rightLines.map(line => 
-            `<div class="line">${this.escapeHtml(line)}</div>`
-        ).join('');
+        // Clear containers
+        this.leftContainer.innerHTML = '';
+        this.rightContainer.innerHTML = '';
     }
 
     applyDiffHighlighting() {
+        const leftLines = this.leftEditor.value.split('\n');
+        const rightLines = this.rightEditor.value.split('\n');
+
+        // Apply diff highlighting to lines
         let leftLineIndex = 0;
         let rightLineIndex = 0;
 
         this.diffResults.forEach((diff, index) => {
             if (diff.type === 'equal') {
+                // For equal lines, add transparent placeholders to maintain line alignment
+                const leftLine = this.createLineElement('', 'equal');
+                const rightLine = this.createLineElement('', 'equal');
+                
+                this.leftContainer.appendChild(leftLine);
+                this.rightContainer.appendChild(rightLine);
+                
                 leftLineIndex++;
                 rightLineIndex++;
             } else if (diff.type === 'removed') {
-                // Highlight removed line in left editor
-                const leftLines = this.leftEditor.querySelectorAll('.line');
-                if (leftLines[leftLineIndex]) {
-                    leftLines[leftLineIndex].classList.add('diff-line', 'removed');
-                }
+                // Add removed line to left container only
+                const leftLine = this.createLineElement(leftLines[leftLineIndex], 'removed');
+                this.leftContainer.appendChild(leftLine);
                 leftLineIndex++;
             } else if (diff.type === 'added') {
-                // Highlight added line in right editor
-                const rightLines = this.rightEditor.querySelectorAll('.line');
-                if (rightLines[rightLineIndex]) {
-                    rightLines[rightLineIndex].classList.add('diff-line', 'added');
-                }
+                // Add added line to right container only
+                const rightLine = this.createLineElement(rightLines[rightLineIndex], 'added');
+                this.rightContainer.appendChild(rightLine);
                 rightLineIndex++;
             }
         });
-
-        // Apply inline diff if enabled
-        if (this.showInlineDiff) {
-            this.applyInlineDiff();
-        }
     }
 
-    applyInlineDiff() {
+    createLineElement(text, type) {
+        const lineDiv = document.createElement('div');
+        lineDiv.className = `line diff-line ${type}`;
+        lineDiv.style.padding = '0 12px';
+        lineDiv.style.height = `${this.fontSize + 6}px`;
+        lineDiv.style.lineHeight = `${this.fontSize + 6}px`;
+        lineDiv.style.fontFamily = 'Consolas, Monaco, Courier New, monospace';
+        lineDiv.style.whiteSpace = 'pre';
+        
+        // For equal lines, make them transparent and don't show text
+        if (type === 'equal') {
+            lineDiv.style.backgroundColor = 'transparent';
+            lineDiv.style.borderLeft = 'none';
+            lineDiv.style.color = 'transparent';
+            return lineDiv;
+        }
+        
+        if (this.showWhitespace) {
+            lineDiv.innerHTML = this.renderWhitespace(text);
+        } else {
+            lineDiv.textContent = text;
+        }
+
+        // Apply inline diff if enabled and line is modified
+        if (this.showInlineDiff && type !== 'equal') {
+            this.applyInlineDiff(lineDiv, text, type);
+        }
+
+        return lineDiv;
+    }
+
+    renderWhitespace(text) {
+        return text
+            .replace(/\t/g, '<span class="whitespace-char tab"></span>')
+            .replace(/ /g, '<span class="whitespace-char space"></span>')
+            .replace(/([^\s])\s+$/g, '$1<span class="whitespace-char trailing"></span>');
+    }
+
+    applyInlineDiff(lineDiv, text, type) {
         // Simple word-level diff for demonstration
         // In a real implementation, you'd use a more sophisticated algorithm
-        const leftLines = this.leftEditor.querySelectorAll('.line');
-        const rightLines = this.rightEditor.querySelectorAll('.line');
-
-        leftLines.forEach((line, index) => {
-            if (line.classList.contains('diff-line')) {
-                const text = line.textContent;
-                const words = text.split(/(\s+)/);
-                line.innerHTML = words.map(word => 
-                    `<span class="diff-word removed">${this.escapeHtml(word)}</span>`
-                ).join('');
+        const words = text.split(/(\s+)/);
+        lineDiv.innerHTML = words.map(word => {
+            if (/\s/.test(word)) {
+                return this.renderWhitespace(word);
+            } else {
+                return `<span class="diff-word ${type}">${this.escapeHtml(word)}</span>`;
             }
-        });
-
-        rightLines.forEach((line, index) => {
-            if (line.classList.contains('diff-line')) {
-                const text = line.textContent;
-                const words = text.split(/(\s+)/);
-                line.innerHTML = words.map(word => 
-                    `<span class="diff-word added">${this.escapeHtml(word)}</span>`
-                ).join('');
-            }
-        });
+        }).join('');
     }
 
     updateGutters() {
@@ -437,18 +580,23 @@ console.log("The result is: " + result);`;
         document.getElementById('leftLineCount').textContent = leftLines;
         document.getElementById('rightLineCount').textContent = rightLines;
         document.getElementById('diffCount').textContent = addedCount + removedCount;
+        
+        // Update whitespace info
+        const whitespaceInfo = document.getElementById('whitespaceInfo');
+        if (this.showWhitespace) {
+            whitespaceInfo.style.display = 'inline';
+        } else {
+            whitespaceInfo.style.display = 'none';
+        }
     }
 
     navigateDiff(direction) {
-        const diffLines = [
-            ...this.leftEditor.querySelectorAll('.diff-line'),
-            ...this.rightEditor.querySelectorAll('.diff-line')
-        ];
-
+        const diffLines = document.querySelectorAll('.diff-line:not(.equal)');
+        
         if (diffLines.length === 0) return;
 
         // Remove previous highlight
-        diffLines.forEach(line => line.style.backgroundColor = '');
+        diffLines.forEach(line => line.classList.remove('current'));
 
         // Calculate new index
         this.currentDiffIndex += direction;
@@ -460,7 +608,7 @@ console.log("The result is: " + result);`;
 
         // Highlight current diff
         const currentLine = diffLines[this.currentDiffIndex];
-        currentLine.style.backgroundColor = 'var(--border-focus)';
+        currentLine.classList.add('current');
         currentLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 

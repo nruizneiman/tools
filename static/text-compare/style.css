@@ -14,7 +14,7 @@
     --gutter-bg: #f3f3f3;
     --gutter-border: #e0e0e0;
     
-    /* Diff colors */
+    /* VS Code-style diff colors */
     --diff-added-bg: #e6ffed;
     --diff-added-border: #a3d9a4;
     --diff-removed-bg: #ffe6e6;
@@ -23,6 +23,18 @@
     --diff-modified-border: #ffeaa7;
     --diff-added-text: #22863a;
     --diff-removed-text: #cb2431;
+    --diff-modified-text: #b08800;
+    
+    /* Inline diff colors */
+    --inline-added-bg: #acf2bd;
+    --inline-removed-bg: #fdb8c0;
+    --inline-added-text: #22863a;
+    --inline-removed-text: #cb2431;
+    
+    /* Whitespace indicators */
+    --whitespace-color: #d0d0d0;
+    --tab-indicator: #ff6b6b;
+    --space-indicator: #4ec9b0;
     
     /* Button colors */
     --btn-primary-bg: #007acc;
@@ -48,7 +60,7 @@
     --gutter-bg: #252526;
     --gutter-border: #3c3c3c;
     
-    /* Diff colors for dark theme */
+    /* VS Code-style diff colors for dark theme */
     --diff-added-bg: #0c2b0c;
     --diff-added-border: #1b4f1b;
     --diff-removed-bg: #2b0c0c;
@@ -57,6 +69,18 @@
     --diff-modified-border: #4f4f1b;
     --diff-added-text: #4ec9b0;
     --diff-removed-text: #f44747;
+    --diff-modified-text: #d7ba7d;
+    
+    /* Inline diff colors for dark theme */
+    --inline-added-bg: #0c2b0c;
+    --inline-removed-bg: #2b0c0c;
+    --inline-added-text: #4ec9b0;
+    --inline-removed-text: #f44747;
+    
+    /* Whitespace indicators for dark theme */
+    --whitespace-color: #6e6e6e;
+    --tab-indicator: #ff6b6b;
+    --space-indicator: #4ec9b0;
     
     /* Button colors for dark theme */
     --btn-primary-bg: #007acc;
@@ -210,6 +234,7 @@ body {
     user-select: none;
     min-width: 50px;
     overflow-y: hidden;
+    z-index: 3;
 }
 
 .line-number {
@@ -228,6 +253,7 @@ body {
     flex-direction: column;
     align-items: center;
     padding: 8px 0;
+    z-index: 3;
 }
 
 .gutter-marker {
@@ -252,7 +278,7 @@ body {
 }
 
 .gutter-marker.modified {
-    background-color: #f39c12;
+    background-color: var(--diff-modified-text);
 }
 
 /* Text editor */
@@ -271,46 +297,127 @@ body {
     overflow-wrap: normal;
     overflow-x: auto;
     overflow-y: auto;
+    position: relative;
+    z-index: 1;
 }
 
 .text-editor:focus {
     border: 1px solid var(--border-focus);
 }
 
-/* Diff highlighting */
+/* Editor lines container for diff highlighting */
+.editor-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: transparent;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 8px 0;
+}
+
+/* VS Code-style diff highlighting */
 .diff-line {
     position: relative;
+    border-left: 3px solid transparent;
+    margin: 0;
+    padding: 0 12px;
+    height: 20px;
+    line-height: 20px;
+    white-space: pre;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.diff-line.equal {
+    background-color: transparent !important;
+    border-left-color: transparent !important;
+    color: transparent !important;
+    pointer-events: none;
 }
 
 .diff-line.added {
     background-color: var(--diff-added-bg);
-    border-left: 3px solid var(--diff-added-border);
+    border-left-color: var(--diff-added-border);
 }
 
 .diff-line.removed {
     background-color: var(--diff-removed-bg);
-    border-left: 3px solid var(--diff-removed-border);
+    border-left-color: var(--diff-removed-border);
 }
 
 .diff-line.modified {
     background-color: var(--diff-modified-bg);
-    border-left: 3px solid var(--diff-modified-border);
+    border-left-color: var(--diff-modified-border);
 }
 
+/* Inline diff highlighting */
 .diff-word {
     padding: 1px 2px;
     border-radius: 2px;
+    font-weight: 500;
 }
 
 .diff-word.added {
-    background-color: var(--diff-added-text);
-    color: white;
+    background-color: var(--inline-added-bg);
+    color: var(--inline-added-text);
 }
 
 .diff-word.removed {
-    background-color: var(--diff-removed-text);
-    color: white;
+    background-color: var(--inline-removed-bg);
+    color: var(--inline-removed-text);
     text-decoration: line-through;
+}
+
+.diff-word.modified {
+    background-color: var(--diff-modified-bg);
+    color: var(--diff-modified-text);
+}
+
+/* Whitespace visualization */
+.whitespace-char {
+    position: relative;
+    display: inline-block;
+    width: 1ch;
+    height: 1em;
+}
+
+.whitespace-char.space::after {
+    content: '·';
+    color: var(--space-indicator);
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-weight: bold;
+}
+
+.whitespace-char.tab::after {
+    content: '→';
+    color: var(--tab-indicator);
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-weight: bold;
+}
+
+.whitespace-char.trailing::after {
+    content: '·';
+    color: var(--whitespace-color);
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-weight: bold;
+}
+
+/* Line highlighting for current diff */
+.diff-line.current {
+    background-color: var(--border-focus) !important;
+    opacity: 0.8;
 }
 
 /* Status bar */
